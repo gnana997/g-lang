@@ -30,15 +30,6 @@ typedef struct {
     int value;
 } TokenLiteral;
 
-const char* tokenTypeToString(KeywordKind type) {
-    switch (type) {
-        case EXIT:
-            return "EXIT";
-        default:
-            return "UNKNOWN";
-    }
-}
-
 TokenLiteral generateNumber(char current, FILE *file) {
     TokenLiteral token;
     token.type = INT;
@@ -49,6 +40,7 @@ TokenLiteral generateNumber(char current, FILE *file) {
         current = fgetc(file);
     }
     token.value = value;
+    ungetc(current, file);
     return token;
 }
 
@@ -68,6 +60,7 @@ TokenKeyword *generateKeyword(char current, FILE *file) {
     }
 
     free(keyword);
+    ungetc(current, file);
     return token;
 }
 
@@ -85,7 +78,9 @@ void lexer(FILE *file) {
             printf("LITERAL %d\n", test_token.value);
         } else if (isalpha(current)) {
             TokenKeyword *test_token = generateKeyword(current, file);
-            printf("KEYWORD %c\n", tokenTypeToString(test_token->type));
+            if (test_token->type == EXIT) {
+                printf("EXIT\n");
+            }
             free(test_token);
         }
         current = fgetc(file);
