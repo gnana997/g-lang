@@ -29,7 +29,7 @@ To run the lexer on the sample input file test.unn, use the following command:
 The lexer will read the test.unn file and print the tokens to the console.
 
 ## Token Types
-The lexer recognizes the following token types:
+. The lexer recognizes the following token types:
 
 - SEMI: Semicolon (;)
 - OPEN_PAREN: Open parenthesis (()
