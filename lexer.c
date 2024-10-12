@@ -1,21 +1,8 @@
+#include "lexer.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-// Define the types of tokens
-typedef enum {
-    INT,
-    KEYWORD,
-    SEPARATOR,
-    END_OF_TOKENS,
-} TokenType;
-
-// Define the structure of a token
-typedef struct {
-    TokenType type;
-    char *value;
-} Token;
 
 // Function to print a token
 // Arguments:
@@ -41,6 +28,9 @@ void print_token(Token token) {
             break;
         case END_OF_TOKENS:
             printf(" TOKEN TYPE: END_OF_TOKENS\n");
+            break;
+        case BEGINNING:
+            printf(" TOKEN TYPE: BEGINNING\n");
             break;
     }
 }
