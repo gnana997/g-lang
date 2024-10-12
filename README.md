@@ -2,7 +2,7 @@
 
 # Building compiler for my language
 
-This project is a simple compiler for a custom language called g-lang. The compiler is written in C and includes a lexer to tokenize the input source code.
+This project is a simple compiler for a custom language called g-lang just for learning purpose. The compiler is written in C and includes a lexer to tokenize the input source code.
 
 ## Project Structure
 
@@ -24,9 +24,9 @@ This will compile main.c and generate an executable named main.
 To run the lexer on the sample input file test.unn, use the following command:
 
 ```sh
-./main
+./build/main <filename.unn>
 ```
-The lexer will read the test.unn file and print the tokens to the console.
+The lexer will read the filename.unn file and print the tokens and basic AST to the console.
 
 ## Token Types
 . The lexer recognizes the following token types:
@@ -41,3 +41,4 @@ The lexer will read the test.unn file and print the tokens to the console.
 - generateNumber(char current, FILE *file): Generates a token for integer literals.
 - generateKeyword(char current, FILE *file): Generates a token for keywords.
 - tokenTypeToString(KeywordKind type): Converts a keyword token type to a string.
+- parse(Token *tokens): parses the tokens and created a AST
