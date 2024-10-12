@@ -1,25 +1,10 @@
+#include "parser.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include<ctype.h>
 #include <sys/_types/_null.h>
 #include "lexer.h"
-
-typedef enum {
-    INT_LIT,
-    BEGINING,
-    STATEMENT,
-    SEPARATORS,
-    END_OF_STATEMENT,
-} NodeTypes;
-
-typedef struct Node {
-    char *value;
-    NodeTypes type;
-    struct Node *right;
-    struct Node *left;
-} Node;
-
 
 void print_tree(Node *root, int indenter, char *side) {
     if (root == NULL) {
@@ -40,7 +25,12 @@ void print_tree(Node *root, int indenter, char *side) {
     print_tree(root->right, indenter +1, "right");
 }
 
-Node *init_node(Node *node, char *value, NodeTypes type) {
+void print_errors(char *message) {
+    printf("Syntax Error: %s\n", message);
+    exit(1);
+}
+
+Node *init_node(Node *node, char *value, TokenType type) {
     node = malloc(sizeof(Node));
     node->value = malloc(sizeof(char) * 2);
     node->value = value;
@@ -63,7 +53,7 @@ Token *parse(Token *tokens) {
 
     Node *root = malloc(sizeof(Node));
     
-    root = init_node(root, "PROGRAM", BEGINING);
+    root = init_node(root, "PROGRAM", BEGINNING);
     
     Node *current = root;
 
@@ -76,39 +66,73 @@ Token *parse(Token *tokens) {
             //
         }
 
-        if(current_token->type == KEYWORD && strcmp(current_token->value, "exit")) {
-            Node *exit_node = malloc(sizeof(Node));
-            exit_node = init_node(exit_node, current_token->value, STATEMENT);
-            root->right = exit_node;
-            current = exit_node;
-            current_token++;
+        switch (current_token->type) {
+            case KEYWORD:
+                if (strcmp(current_token->value, "EXIT") == 0) {
+                    Node *exit_node = malloc(sizeof(Node));
+                    exit_node = init_node(exit_node, current_token->value, KEYWORD);
+                    root->right = exit_node;
+                    current = exit_node;
+                    current_token++;
 
-            if(current_token->type != SEPARATOR) {
-                printf("Syntax Error: Expected ;\n");
+                    if (current_token->type != END_OF_TOKENS && strcmp(current_token->value, "(") == 0) {
+                        Node *open_paren = malloc(sizeof(Node));
+                        open_paren = init_node(open_paren, current_token->value, SEPARATOR);
+                        current->left = open_paren;
+                        current_token++;
+                        
+                        if (current_token->type != END_OF_TOKENS && current_token->type == INT) {
+                            Node *expr = malloc(sizeof(Node));
+                            expr = init_node(expr, current_token->value, KEYWORD);
+                            current->left->left = expr;
+                            current_token++;
+
+                            if (current_token->type != END_OF_TOKENS && strcmp(current_token->value, ")") == 0) {
+                                Node *close_paren = malloc(sizeof(Node));
+                                close_paren = init_node(close_paren, current_token->value, SEPARATOR);
+                                current->left->right = close_paren;
+                                current_token++;
+
+                                if (current_token->type != END_OF_TOKENS && strcmp(current_token->value, ";") == 0) {
+                                    Node *semi = malloc(sizeof(Node));
+                                    semi = init_node(semi, current_token->value, END_OF_TOKENS);
+                                    current->right = semi;
+                                    current_token++;
+
+                                } else {
+                                    print_errors("Expected SEMICOLON");
+                                    exit(1);
+                                }
+                            } else {
+                                print_errors("Expected CLOSE PARAN");
+                                exit(1);
+                            }
+                        } else {
+                            print_errors("Expected INT");
+                            exit(1);
+                        }
+                    } else {
+                        print_errors("Expected OPEN PARAN");
+                        exit(1);
+                    }
+                } else {
+                    print_errors("Expected exit Keyword");
+                    exit(1);
+                }
                 break;
-            }
-
-            Node *open_paren = malloc(sizeof(Node));
-            open_paren = init_node(open_paren, current_token->value, SEPARATORS);
-            current->left = open_paren;
-            current_token++;
-
-            Node *expr = malloc(sizeof(Node));
-            expr = init_node(expr, current_token->value, STATEMENT);
-            current->left->left = expr;
-            current_token++;
-
-            Node *close_paren = malloc(sizeof(Node));
-            close_paren = init_node(close_paren, current_token->value, SEPARATORS);
-            current->left->right = close_paren;
-            current_token++;
-
-            Node *semi = malloc(sizeof(Node));
-            semi = init_node(semi, current_token->value, END_OF_STATEMENT);
-            current->right = semi;
-            break;
+                //
+            case SEPARATOR:
+                //
+            case INT:
+                //
+            case END_OF_TOKENS:
+                //
+            case BEGINNING:
+                //
+            default:
+                printf("Syntax Error: Unexpected token\n");
+                exit(1);
         }
-        current_token++;
     }
 
     print_tree(root, 0, "root");
