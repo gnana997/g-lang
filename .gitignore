@@ -1,2 +1,5 @@
 assembly/test
 assembly/test.o
+
+generated
+generated.o
